@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.effect.Glow?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane id="AnchorPane" prefHeight="503.0" prefWidth="673.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/9.0.1" fx:controller="javafxapplication9checkbox.FXMLDocumentController">
+   <children>
+      <HBox layoutX="203.0" layoutY="36.0" prefHeight="349.0" prefWidth="673.0" AnchorPane.bottomAnchor="154.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <effect>
+            <Glow />
+         </effect>
+         <children>
+            <VBox prefHeight="349.0" prefWidth="172.0">
+               <children>
+                  <ListView fx:id="listView1" prefHeight="348.0" prefWidth="172.0">
+                     <effect>
+                        <Glow />
+                     </effect>
+                  </ListView>
+               </children>
+            </VBox>
+            <VBox prefHeight="349.0" prefWidth="183.0">
+               <children>
+                  <ListView fx:id="listView2" prefHeight="347.0" prefWidth="183.0" />
+               </children>
+            </VBox>
+            <VBox prefHeight="349.0" prefWidth="168.0">
+               <children>
+                  <ListView fx:id="listView3" prefHeight="347.0" prefWidth="168.0" />
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+   </children>
+</AnchorPane>
