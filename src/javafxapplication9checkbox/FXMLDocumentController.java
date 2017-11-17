@@ -11,6 +11,7 @@ import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,7 +70,7 @@ public class FXMLDocumentController implements Initializable {
     @FXML ObservableList<Business> tableList1;
    
     @FXML ComboBox comboBox1, comboBox2, comboBox3, comboBox4;
-    @FXML ObservableList<String> comboBoxWeek ;
+    @FXML ObservableList<String> comboBoxWeek, comboBoxSelectAttribute ;
     @FXML ObservableList<Integer> comboBoxTimeFrom, comboBoxTimeTo;    
     @FXML ArrayList<Integer> timeArrayList;
     @FXML int timeListSimpleArray[];
@@ -109,27 +110,52 @@ public class FXMLDocumentController implements Initializable {
      }
     
     //SEARCH BUTTON ACTION HANDLER
-    @FXML private void searchButtonAction(ActionEvent event) throws IOException {
-        String css = JavaFXApplication9CheckBox.class.getResource("listStyle.css").toExternalForm();
-        
-        FXMLLoader loader = new FXMLLoader();
-        loader.setLocation(getClass().getResource("FXMLSecondDocument.fxml"));
-        Parent home_page_parent = loader.load();
-        
-        
-        Scene home_page_scene = new Scene(home_page_parent);
-        
-        FXMLSecondDocumentController controller = loader.getController();
-        
-        Review tempReview1 = new Review("date","3","search button temporary review","Vijayvargiya", "11");
-        Review[] tempReviewArray1 = new Review[]{tempReview1};
-//        controller.initObservableReviewList(tempReviewArray1);
-//      controller.initObservableReviewList(tableView1.getSelectionModel().getSelectedItem().getReviewList());
-        
-        Stage app_stage = (Stage)((Node) event.getSource()).getScene().getWindow();
-        home_page_scene.getStylesheets().add(css);
-        app_stage.setScene(home_page_scene);
-        app_stage.show();
+    @FXML private void searchButtonAction(ActionEvent event) throws IOException, Exception {
+//        String css = JavaFXApplication9CheckBox.class.getResource("listStyle.css").toExternalForm();
+//        
+//        FXMLLoader loader = new FXMLLoader();
+//        loader.setLocation(getClass().getResource("FXMLSecondDocument.fxml"));
+//        Parent home_page_parent = loader.load();
+//        
+//        
+//        Scene home_page_scene = new Scene(home_page_parent);
+//        
+//        FXMLSecondDocumentController controller = loader.getController();
+//        
+//        Review tempReview1 = new Review("date","3","search button temporary review","Vijayvargiya", "11");
+//        Review[] tempReviewArray1 = new Review[]{tempReview1};
+////        controller.initObservableReviewList(tempReviewArray1);
+////      controller.initObservableReviewList(tableView1.getSelectionModel().getSelectedItem().getReviewList());
+//        
+//        Stage app_stage = (Stage)((Node) event.getSource()).getScene().getWindow();
+//        home_page_scene.getStylesheets().add(css);
+//        app_stage.setScene(home_page_scene);
+//        app_stage.show();
+//        app_stage.show();
+          ArrayList<String[]> tempBusinessTableData = new ArrayList<>();
+//          tempBusinessTableData = final_result(
+//                  listView1CheckedItems,
+//                  listView2CheckedItems,
+//                  listView3CheckedItems,
+//                  comboBox1.getSelectionModel().getSelectedItem().toString(),
+//                  comboBox3.getSelectionModel().getSelectedItem().toString(),
+//                  comboBox2.getSelectionModel().getSelectedItem().toString(),
+//                  comboBox4.getSelectionModel().getSelectedItem().toString()
+//          );
+            tempBusinessTableData = final_result(
+                  listView1CheckedItems,
+                  listView2CheckedItems,
+                  listView3CheckedItems,
+                  comboBox1.getSelectionModel().getSelectedItem().toString(),
+                  comboBox3.getSelectionModel().getSelectedItem().toString(),
+                  comboBox2.getSelectionModel().getSelectedItem().toString(),
+                  comboBox4.getSelectionModel().getSelectedItem().toString()
+             );
+          System.out.println(tempBusinessTableData.toString());
+          for(String[] str : tempBusinessTableData){
+             tableList1.add(new Business(str[0] ,str[1], str[2], str[3], str[4])); 
+          }
+          
      }
     
 //    MOAKE CONNECTION TO database
@@ -198,6 +224,352 @@ public class FXMLDocumentController implements Initializable {
         return listOfReviewAttributes;
     }
     
+    @FXML public ArrayList<String> find_second_col (ArrayList<String> a, String b) throws Exception
+	{
+		ArrayList<String> sub_catarray = new ArrayList<String>();
+		String between_values = b;
+		between_values = " " + between_values + " ";
+		Connection conn = null;
+		ResultSet fireResult = null;
+		java.sql.Statement stmt = null;
+		if (a != null) 
+		{
+			String mainQuery = "SELECT DISTINCT S.C_NAME FROM B_MAIN_CATEGORY M,B_SUB_CATEGORY S WHERE M.BID = S.BID AND M.C_NAME = ";
+			String query = mainQuery;
+			System.out.println("SELECTED MAIN CATEGORIES ARE: " + a);
+			for (int i = 0; i < a.size(); i++) 
+			{
+				if (i == a.size() - 1) 
+				{
+					query = query + "'" + a.get(i) + "'";
+				} else {
+					query = query + "'" + a.get(i) + "'" + between_values + mainQuery;
+				}
+			}	
+			conn = getDBConnection();
+			stmt = conn.prepareStatement(query);
+			fireResult = stmt.executeQuery(query);
+			ResultSetMetaData meta = fireResult.getMetaData();
+			while (fireResult.next()) 
+			{
+				for (int i = 1; i <= meta.getColumnCount(); i++) 
+				{
+					sub_catarray.add(fireResult.getString(i));
+				}
+			}
+		}else{
+                    return sub_catarray;
+                }
+		return sub_catarray;			
+	}
+    
+    @FXML public ArrayList<String> find_third_col (ArrayList<String> a, ArrayList<String> b, String c) throws Exception
+	{
+		ArrayList<String> att_catarray = new ArrayList<String>();
+		ArrayList<String> main_catarray = new ArrayList<String>();
+		main_catarray = b;
+		String between_values = c;
+		between_values = " " + between_values + " ";
+		
+		Connection conn = null;
+		ResultSet fireResult = null;
+		java.sql.Statement stmt = null;
+		if (a != null) 
+		{
+			String mainQuery = "SELECT DISTINCT A.A_NAME FROM B_MAIN_CATEGORY M, B_SUB_CATEGORY S, B_ATTRIBUTES A WHERE M.BID = S.BID AND S.BID = A.BID AND M.C_NAME LIKE ";
+			//System.out.println(a.toString());
+			String query = mainQuery;
+			String subquery = " AND S.C_NAME LIKE ";
+			for (int i = 0; i < main_catarray.size(); i++) 
+			{
+				for(int j = 0; j < a.size(); j++)
+				{	
+					if (i == main_catarray.size() - 1 && j == a.size() -1) 
+					{
+						query = query + "'" + main_catarray.get(i) + "'" + subquery + "'" + a.get(j) + "'" ;
+						//System.out.println("i is " + i + " & j is " + j);
+						//System.out.println(query);
+					} else {
+						query = query + "'" + main_catarray.get(i) + "'" + subquery + "'" + a.get(j) + "'" + between_values + mainQuery;
+						//System.out.println("i is " + i + " & j is " + j);
+						//System.out.println(query);
+					}
+				}
+			}			
+			
+			System.out.println(query);
+			conn = getDBConnection();
+			stmt = conn.prepareStatement(query);
+			fireResult = stmt.executeQuery(query);
+			
+			ResultSetMetaData meta = fireResult.getMetaData();
+			while (fireResult.next()) 
+			{
+				for (int i = 1; i <= meta.getColumnCount(); i++) 
+				{
+					att_catarray.add(fireResult.getString(i));
+				}
+			}			
+		}
+		return att_catarray;
+	}
+    
+    
+    @FXML public ArrayList<String[]> final_result(ArrayList<String> a, ArrayList<String> b, ArrayList<String> c, String d, String e, String f, String g) throws Exception
+	{
+		ArrayList<String> main_catarray = new ArrayList<String>();
+		ArrayList<String> sub_catarray = new ArrayList<String>();
+		ArrayList<String> att_catarray = new ArrayList<String>();
+		ArrayList<String[]> bus_list = new ArrayList<String[]>();
+		main_catarray = a;
+		sub_catarray = b;
+		att_catarray = c;
+		String between_values;
+		String b_v = g;
+		if(b_v.equals("AND"))
+		{
+			between_values = " INTERSECT ";
+		}
+		else
+		{
+			between_values = " UNION ";
+		}
+		
+		
+		String day = d;
+		String to = e;
+		String from = f;
+                float from_sel, to_sel;
+		//String loc_state = null;
+		//String loc_city = null;
+		if(from != null)
+                {
+                   from_sel = Float.parseFloat(from); 
+                }
+		else
+                {
+                    from_sel = -1;
+                }
+                if(to != null)
+                {
+                   to_sel = Float.parseFloat(to); 
+                }
+		else
+                {
+                     to_sel = 25;
+                }
+		
+                
+		String[] row;
+                row = null;
+                
+		Connection conn = null;
+		ResultSet fireResult = null;
+		java.sql.Statement stmt = null;
+		String query = null;
+		if(att_catarray!=null)
+		{
+			String mainQuery = null;
+			String select_query = " SELECT DISTINCT B.BID, B.B_NAME, B.CITY, B.STATE, B.STARS ";
+			String from_query = " FROM B_MAIN_CATEGORY M, BUSINESS B, B_SUB_CATEGORY S, B_ATTRIBUTES A ";
+			String where_query = " WHERE M.BID = B.BID AND M.BID = S.BID AND A.BID = B.BID ";
+//			if (loc_city != null)
+//			{
+//				from_query = from_query + "";
+//				where_query = where_query + " AND B.CITY LIKE '" + loc_city + "'";
+//			}
+//			
+//			if (loc_state != null)
+//			{
+//				from_query = from_query + "";
+//				where_query = where_query + " AND B.STATE LIKE '" + loc_state + "'";
+//			}
+			
+			if (day != null)
+			{
+				from_query = from_query + ", B_HOURS H ";
+				where_query = where_query + " AND B.BID = H.BID AND H.D_O_W LIKE '"+ day + "' AND H.FROM_H >= " + from_sel + " AND H.TO_H <=" + to_sel;
+			}
+			else
+			{
+				if(from_sel >= 0)
+				{
+					from_query = from_query + ", B_HOURS H ";
+					where_query = where_query + " AND B.BID = H.BID AND H.FROM_H >= " + from_sel;
+					if(to_sel <= 24)
+					{
+						where_query = where_query + " AND H.TO_H <= " + to_sel;
+					}
+				}
+				else if(to_sel <= 24)
+				{
+					from_query = from_query + ", B_HOURS H ";
+					where_query = where_query + " AND B.BID = H.BID AND H.TO_H <=" + to_sel;
+				}
+			}			
+			
+			query = select_query + from_query + where_query + " AND M.C_NAME LIKE ";
+			mainQuery = query;
+			String subquery2 = " AND A.A_NAME LIKE ";
+				String subquery = " AND S.C_NAME LIKE ";
+
+				for (int i = 0; i < main_catarray.size(); i++) 
+				{
+					for(int j = 0; j < sub_catarray.size(); j++)
+					{	
+						for(int k = 0; k < att_catarray.size(); k++)
+						{
+							if (i == main_catarray.size() - 1 && j == sub_catarray.size() -1) 
+							{
+								query = query + "'" + main_catarray.get(i) + "'" + subquery + "'" + sub_catarray.get(j)+ "'" + subquery2 + "'" + att_catarray.get(k) + "'";
+							} else 
+							{
+								query = query + "'" + main_catarray.get(i) + "'" + subquery + "'" + sub_catarray.get(j) + "'" + subquery2 + "'" + att_catarray.get(k) + "'" + between_values + mainQuery;
+							}
+						}
+					}
+				}
+				//last line of attr_catarray
+		}
+		else if( sub_catarray != null)
+		{
+			String mainQuery = null;
+			String select_query = " SELECT DISTINCT B.BID, B.B_NAME, B.CITY, B.STATE, B.STARS ";
+			String from_query = " FROM B_MAIN_CATEGORY M, BUSINESS B, B_SUB_CATEGORY S ";
+			String where_query = "WHERE M.BID = B.BID AND M.BID = S.BID ";
+//			if (loc_city != null)
+//			{
+//				from_query = from_query + "";
+//				where_query = where_query + " AND B.CITY LIKE '" + loc_city + "'";
+//			}
+//			
+//			if (loc_state != null)
+//			{
+//				from_query = from_query + "";
+//				where_query = where_query + " AND B.STATE LIKE '" + loc_state + "'";
+//			}
+			
+			if (day != null)
+			{
+				from_query = from_query + ", B_HOURS H ";
+				where_query = where_query + " AND B.BID = H.BID AND H.D_O_W = '"+ day + "' AND H.FROM_H >= " + from_sel + " AND H.TO_H <=" + to_sel;
+			}
+			else
+			{
+				if(from_sel >= 0)
+				{
+					from_query = from_query + ", B_HOURS H ";
+					where_query = where_query + " AND B.BID = H.BID AND H.FROM_H >= " + from_sel;
+					if(to_sel <= 24)
+					{
+						where_query = where_query + " AND H.TO_H <= " + to_sel;
+					}
+				}
+				else if(to_sel <= 24)
+				{
+					from_query = from_query + ", B_HOURS H ";
+					where_query = where_query + " AND B.BID = H.BID AND H.TO_H <=" + to_sel;
+				}
+			}			
+			
+			query = select_query + from_query + where_query + " AND M.C_NAME = ";
+			mainQuery = query;
+				String subquery = " AND S.C_NAME = ";
+				for (int i = 0; i < main_catarray.size(); i++) 
+				{
+					for(int j = 0; j < sub_catarray.size(); j++)
+					{	
+						if (i == main_catarray.size() - 1 && j == sub_catarray.size() -1) 
+						{
+							query = query + "'" + main_catarray.get(i) + "'" + subquery + "'" + sub_catarray.get(j) + "'" ;
+						} else 
+						{
+							query = query + "'" + main_catarray.get(i) + "'" + subquery + "'" + sub_catarray.get(j) + "'" + between_values + mainQuery;
+						}
+					}
+				}
+				
+			//last line of sub_catarray
+		}
+		else if(main_catarray!=null)
+		{
+			//String mainQuery = null;
+			String select_query = " SELECT DISTINCT B.BID, B.B_NAME, B.CITY, B.STATE, B.STARS ";
+			String from_query = " FROM B_MAIN_CATEGORY M, BUSINESS B ";
+			String where_query = "WHERE M.BID = B.BID ";
+//			if (loc_city != null)
+//			{
+//				from_query = from_query + "";
+//				where_query = where_query + " AND B.CITY = '" + loc_city + "'";
+//			}
+//			
+//			if (loc_state != null)
+//			{
+//				from_query = from_query + "";
+//				where_query = where_query + " AND B.STATE = '" + loc_state + "'";
+//			}
+			
+			if (day != null)
+			{
+				from_query = from_query + ", B_HOURS H ";
+				where_query = where_query + " AND B.BID = H.BID AND H.D_O_W = '"+ day + "' AND H.FROM_H >= " + from_sel + " AND H.TO_H <=" + to_sel;
+			}
+			else
+			{
+				if(from_sel >= 0)
+				{
+					from_query = from_query + ", B_HOURS H ";
+					where_query = where_query + " AND B.BID = H.BID AND H.FROM_H >= " + from_sel;
+					if(to_sel <= 24)
+					{
+						where_query = where_query + " AND H.TO_H <= " + to_sel;
+					}
+				}
+				else if(to_sel <= 24)
+				{
+					from_query = from_query + ", B_HOURS H ";
+					where_query = where_query + " AND B.BID = H.BID AND H.TO_H <=" + to_sel;
+				}
+			}
+			
+			
+			query = select_query + from_query + where_query + " AND M.C_NAME = ";
+			String mainQuery = query;
+			for (int i = 0; i < main_catarray.size(); i++) 
+			{
+				if (i == main_catarray.size() - 1) 
+				{
+					query = query + "'" + main_catarray.get(i) + "'";
+				} else {
+					query = query + "'" + main_catarray.get(i) + "'" + between_values + mainQuery;
+				}
+			}	
+		}
+		
+		System.out.println(query);
+		conn = getDBConnection();
+		stmt = conn.prepareStatement(query);
+		fireResult = stmt.executeQuery(query);
+			
+		ResultSetMetaData meta = fireResult.getMetaData();
+		while (fireResult.next()) 
+		{
+			for (int iCol = 1; iCol <= 5; iCol++) {
+				
+				
+					row[iCol - 1] = (fireResult.getObject(iCol)).toString();
+				
+
+				System.out.println("Display->" + fireResult.getString(iCol));
+				//row[iCol - 1] = result.getObject(iCol).toString();
+
+			}
+                        bus_list.add(row);
+
+		}
+		return bus_list;
+	}
+    
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
@@ -251,16 +623,40 @@ public class FXMLDocumentController implements Initializable {
                     BooleanProperty observable = new SimpleBooleanProperty();
                     observable.addListener((obs, wasSelected, isNowSelected) -> {
                         if (isNowSelected) {
-                            
-                                list2.add(item);
-                                listView1CheckedItems.add(item);
-                                System.out.println(listView1CheckedItems.toString());
+                            listView1CheckedItems.add(item);    
+                            try { 
+                                ArrayList<String> tempRes = find_second_col(listView1CheckedItems, comboBox4.getSelectionModel().getSelectedItem().toString());
+                                if(tempRes==null){
+                                    list2.clear();
+                                    System.out.println("1");
+                                } else{
+                                 list2.clear();
+                                 list2.addAll(tempRes);
+                                 System.out.println("2" + comboBox4.getSelectionModel().getSelectedItem().toString());
+                                }
+                                
+                            } catch (Exception ex) {
+                                Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                            System.out.println(listView1CheckedItems.toString());
                                
                         } else {
                                 listView1CheckedItems.remove(item);
-                               list2.remove(item);
-                              list3.remove(item);
-                           System.out.println(listView1CheckedItems.toString());
+                                try {        
+                                
+                                if(listView1CheckedItems.isEmpty()){
+                                    list2.clear();
+                                    System.out.println("3");
+                                } else{
+                                 list2.clear();
+                                 list2.addAll(find_second_col(listView1CheckedItems, comboBox4.getSelectionModel().getSelectedItem().toString()));
+                                 System.out.println("4" + comboBox4.getSelectionModel().getSelectedItem().toString());
+                                }
+                            } catch (Exception ex) {
+                                Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+                            } 
+                            list3.remove(item);
+//                           System.out.println(listView1CheckedItems.toString());
                         }
                     });
                     
@@ -285,11 +681,42 @@ public class FXMLDocumentController implements Initializable {
                     BooleanProperty observable = new SimpleBooleanProperty();
                     observable.addListener((obs, wasSelected, isNowSelected) -> {
                         if (isNowSelected) {
-                            list3.add(item);
-                            listView2CheckedItems.add(item);
+//                            list3.add(item);
+//                            listView2CheckedItems.add(item);
+                            listView2CheckedItems.add(item);    
+                            try { 
+                                ArrayList<String> tempRes = find_third_col(listView2CheckedItems,listView1CheckedItems, comboBox4.getSelectionModel().getSelectedItem().toString());
+                                if(tempRes==null){
+                                    list3.clear();
+                                    System.out.println("1");
+                                } else{
+                                 list3.clear();
+                                 list3.addAll(tempRes);
+                                 System.out.println("2" + comboBox4.getSelectionModel().getSelectedItem().toString());
+                                }
+                                
+                            } catch (Exception ex) {
+                                Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                            System.out.println(listView1CheckedItems.toString());
                         } else {
-                            list3.remove(item);
                             listView2CheckedItems.remove(item);
+                                try {        
+                                
+                                if(listView2CheckedItems.isEmpty()){
+                                    list3.clear();
+                                    System.out.println("3");
+                                } else{
+                                 list3.clear();
+                                 list3.addAll(find_third_col(listView2CheckedItems,listView1CheckedItems, comboBox4.getSelectionModel().getSelectedItem().toString()));
+                                 System.out.println("4" + comboBox4.getSelectionModel().getSelectedItem().toString());
+                                }
+                            } catch (Exception ex) {
+                                Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+                            } 
+//                            list3.remove(item);
+//                            list3.remove(item);
+//                            listView2CheckedItems.remove(item);
                         }
                     });
                     return observable;
@@ -340,9 +767,9 @@ public class FXMLDocumentController implements Initializable {
             return row ;
         });
 
-        Review tempReview = new Review("date","4","some text","Anmol", "6");
-        Review[] tempReviewArray = new Review[]{tempReview};
-        tableList1.add(new Business(1 ,"Business1", "Santa Clara", "CA", "4.5", tempReviewArray));
+//        Review tempReview = new Review("date","4","some text","Anmol", "6");
+//        Review[] tempReviewArray = new Review[]{tempReview};
+//        tableList1.add(new Business("1" ,"Business1", "Santa Clara", "CA", "4.5"));
         
         
         comboBoxWeek =  FXCollections.observableArrayList("Monday", "Teusday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
@@ -374,14 +801,13 @@ public class FXMLDocumentController implements Initializable {
                 }
             }
          comboBoxTimeTo.setAll(tempArrayList);
-         
-            
-           
-            
-           
          });
-        
-        
+         
+         
+        comboBoxSelectAttribute = FXCollections.observableArrayList("AND","OR"); 
+        comboBox4.setItems(comboBoxSelectAttribute);
+        comboBox4.setPromptText("Select Attributes");
+        comboBox4.getSelectionModel().selectFirst();
         
         //END OF INITIALIZE BLOCK
     }    
