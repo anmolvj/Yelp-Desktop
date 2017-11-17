@@ -5,8 +5,13 @@
  */
 package javafxapplication9checkbox;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -72,40 +77,39 @@ public class FXMLDocumentController implements Initializable {
     
     @FXML private Button closeButton, searchButton;
 
-    @FXML
-    private void closeButtonAction(){
+    //CLOSE BUTTON ACTION HANDLER
+    @FXML private void closeButtonAction(){
         // get a handle to the stage
         Stage stage = (Stage) closeButton.getScene().getWindow();
         // do what you have to do
         stage.close();
     }
     
-    @FXML
-    private void tableView1SelectAction(Event event) throws IOException {
-        String css = JavaFXApplication9CheckBox.class.getResource("listStyle.css").toExternalForm();
+    //BUSINESS TABLEVIEW ROW SELECTION HANDLER
+    @FXML private void tableView1SelectAction(Event event) throws IOException, SQLException {
         
+        
+        //SETUP FOR PREPARING SWITCH OF SCENE
+        String css = JavaFXApplication9CheckBox.class.getResource("listStyle.css").toExternalForm();
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(getClass().getResource("FXMLSecondDocument.fxml"));
         Parent home_page_parent = loader.load();
-        
-        
         Scene home_page_scene = new Scene(home_page_parent);
-        
         FXMLSecondDocumentController controller = loader.getController();
         
-//        Review tempReview1 = new Review("date","3","search button temporary review","Vijayvargiya", "11");
-//        Review[] tempReviewArray1 = new Review[]{tempReview1};
-//        controller.initObservableReviewList(tempReviewArray1);
-        controller.initObservableReviewList(tableView1.getSelectionModel().getSelectedItem().getReviews());
         
+        
+        //PASS REVIEW ARRAYLIST TO NEXT SCENE
+//        controller.initObservableReviewList(tableView1.getSelectionModel().getSelectedItem().getReviews());
+        controller.initObservableReviewList(review_final());
         Stage app_stage = (Stage)((Node) event.getSource()).getScene().getWindow();
         home_page_scene.getStylesheets().add(css);
         app_stage.setScene(home_page_scene);
         app_stage.show();
      }
     
-    @FXML
-    private void searchButtonAction(ActionEvent event) throws IOException {
+    //SEARCH BUTTON ACTION HANDLER
+    @FXML private void searchButtonAction(ActionEvent event) throws IOException {
         String css = JavaFXApplication9CheckBox.class.getResource("listStyle.css").toExternalForm();
         
         FXMLLoader loader = new FXMLLoader();
@@ -119,7 +123,7 @@ public class FXMLDocumentController implements Initializable {
         
         Review tempReview1 = new Review("date","3","search button temporary review","Vijayvargiya", "11");
         Review[] tempReviewArray1 = new Review[]{tempReview1};
-        controller.initObservableReviewList(tempReviewArray1);
+//        controller.initObservableReviewList(tempReviewArray1);
 //      controller.initObservableReviewList(tableView1.getSelectionModel().getSelectedItem().getReviewList());
         
         Stage app_stage = (Stage)((Node) event.getSource()).getScene().getWindow();
@@ -128,8 +132,71 @@ public class FXMLDocumentController implements Initializable {
         app_stage.show();
      }
     
-     
+//    MOAKE CONNECTION TO database
+    @FXML private Connection getDBConnection() {
+		Connection dbConnection = null;
+		try {
+			Class.forName("oracle.jdbc.driver.OracleDriver");
+		} catch (ClassNotFoundException e) {
+			System.out.println(e.getMessage());
+		}
+		try {
+			dbConnection = DriverManager.getConnection(
+                    "jdbc:oracle:thin:@localhost:1521:assignment3d", "scott", "tiger");
+			return dbConnection;
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+		return dbConnection;
+	}
    
+    @FXML private ArrayList<Review> review_final() throws SQLException {
+        ArrayList<Review> listOfReviewAttributes = new ArrayList<Review>();
+        String a  = "fpL1qcZ6qbWzC79WU0E-Ug";
+        Connection conn = null;
+        ResultSet result = null;
+        java.sql.Statement stmt = null;
+        if (a != null){
+            String mainQuery = "SELECT R.R_DATE, R.STARS, R.R_TEXT, R.USER_ID, R.USEFUL_VOTE FROM REVIEWS R WHERE R.BID LIKE ";
+            mainQuery = mainQuery + "'" + a + "'";
+            conn = getDBConnection();
+            stmt = conn.prepareStatement(mainQuery);
+            result = stmt.executeQuery(mainQuery);		
+            int nCol = result.getMetaData().getColumnCount();
+            
+            System.out.println("Column Size->" + nCol);
+            
+            System.out.println("Justine");
+            
+            while (result.next()){
+                String[] row = new String[nCol];
+                for (int iCol = 1; iCol <= nCol; iCol++) {
+                    if (iCol == 3) {
+                        StringBuffer strOut = new StringBuffer();
+			String aux;
+                        try {
+			BufferedReader br = new BufferedReader(result.getClob("R_TEXT").getCharacterStream());
+			while ((aux = br.readLine()) != null) {
+				strOut.append(aux);
+				strOut.append(System.getProperty("line.separator"));
+			}
+			} catch (Exception e) {
+			e.printStackTrace();
+                        }
+                        String clobStr = strOut.toString();
+			
+			row[iCol - 1] = clobStr;
+                    }
+                    else{
+                    row[iCol - 1] = result.getObject(iCol).toString();
+                    }
+                    
+                }
+                listOfReviewAttributes.add(new Review(row[0],row[1],row[2],row[3],row[4]));
+            }
+        }
+        return listOfReviewAttributes;
+    }
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -167,6 +234,7 @@ public class FXMLDocumentController implements Initializable {
         for(String str: mainBusinessCategorySimpleArray){
                 mainBusinessCategoryArrayList.add(str);  //something like this?
            }
+        //SETTING FOR 1ST LISTVIEW
         list1 = FXCollections.observableArrayList(mainBusinessCategoryArrayList);
         listView1.setItems(list1);
 //        listView1.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
@@ -200,7 +268,7 @@ public class FXMLDocumentController implements Initializable {
                 }
             }));
         
-        
+        //SETTING FOR 2ND LISTVIEW
         list2 = FXCollections.observableArrayList();
         listView2.setItems(list2);
 //        listView2.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
@@ -229,6 +297,7 @@ public class FXMLDocumentController implements Initializable {
             }));
         
         
+        //SETTING FOR 3RD LISTVIEW
         list3 = FXCollections.observableArrayList();
         listView3.setItems(list3);
         listView3.setCellFactory(CheckBoxListCell.forListView(new Callback<String, ObservableValue<Boolean>>() {
@@ -247,6 +316,7 @@ public class FXMLDocumentController implements Initializable {
             }));
         
         
+        //SETUP FOR BUSINESS TABLEVIEW
         tableList1 =  FXCollections.observableArrayList();
         table1ColumnName.setCellValueFactory(new PropertyValueFactory<>("name"));
         table1ColumnCity.setCellValueFactory(new PropertyValueFactory<>("city"));
@@ -261,6 +331,8 @@ public class FXMLDocumentController implements Initializable {
                     try {   
                         tableView1SelectAction(event);
                     } catch (IOException ex) {
+                        Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (SQLException ex) {
                         Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }

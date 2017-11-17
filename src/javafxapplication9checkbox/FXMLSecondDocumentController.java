@@ -7,6 +7,7 @@ package javafxapplication9checkbox;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -59,7 +60,7 @@ public class FXMLSecondDocumentController implements Initializable {
     }
     
     
-    public void initObservableReviewList(Review[] rList){
+    public void initObservableReviewList(ArrayList<Review> rList){
         for(Review r : rList){
             reviewList.add(r);
 //            System.out.println(r.toString());

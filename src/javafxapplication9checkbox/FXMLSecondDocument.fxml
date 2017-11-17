@@ -8,7 +8,7 @@
 
 <AnchorPane id="AnchorPane" fx:id="secondPane" prefHeight="590.0" prefWidth="828.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafxapplication9checkbox.FXMLSecondDocumentController">
    <children>
-      <Button fx:id="goBackButton" layoutX="616.0" layoutY="470.0" mnemonicParsing="false" onAction="#goBackButtonAction" prefHeight="66.0" prefWidth="191.0" text="CLOSE" />
+      <Button fx:id="goBackButton" layoutX="688.0" layoutY="521.0" mnemonicParsing="false" onAction="#goBackButtonAction" prefHeight="37.0" prefWidth="120.0" text="CLOSE" />
       <HBox layoutY="-3.0" prefHeight="464.0" prefWidth="828.0">
          <children>
             <TableView fx:id="tableViewReview" prefHeight="464.0" prefWidth="832.0">
