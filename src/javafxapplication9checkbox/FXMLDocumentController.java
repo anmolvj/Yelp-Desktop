@@ -5,12 +5,15 @@
  */
 package javafxapplication9checkbox;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
@@ -18,16 +21,23 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
@@ -40,6 +50,11 @@ public class FXMLDocumentController implements Initializable {
     @FXML private Label label;
     @FXML private ListView listView1, listView2, listView3;
     @FXML ObservableList<String> list1, list2, list3;
+    @FXML ArrayList<String> mainBusinessCategoryArrayList;
+    @FXML ArrayList<String> listView1CheckedItems = new ArrayList<String>();
+    @FXML ArrayList<String> listView2CheckedItems = new ArrayList<String>();
+    @FXML ArrayList<String> listView3CheckedItems = new ArrayList<String>();
+    @FXML String mainBusinessCategorySimpleArray[];
     
     @FXML private TableView<Business> tableView1;
     @FXML private TableColumn<Business, String> table1ColumnName;
@@ -66,16 +81,93 @@ public class FXMLDocumentController implements Initializable {
     }
     
     @FXML
-    private void searchButtonAction(ActionEvent event) {
-        System.out.println("You clicked Search!");
+    private void tableView1SelectAction(Event event) throws IOException {
+        String css = JavaFXApplication9CheckBox.class.getResource("listStyle.css").toExternalForm();
         
-    }
+        FXMLLoader loader = new FXMLLoader();
+        loader.setLocation(getClass().getResource("FXMLSecondDocument.fxml"));
+        Parent home_page_parent = loader.load();
+        
+        
+        Scene home_page_scene = new Scene(home_page_parent);
+        
+        FXMLSecondDocumentController controller = loader.getController();
+        
+//        Review tempReview1 = new Review("date","3","search button temporary review","Vijayvargiya", "11");
+//        Review[] tempReviewArray1 = new Review[]{tempReview1};
+//        controller.initObservableReviewList(tempReviewArray1);
+        controller.initObservableReviewList(tableView1.getSelectionModel().getSelectedItem().getReviews());
+        
+        Stage app_stage = (Stage)((Node) event.getSource()).getScene().getWindow();
+        home_page_scene.getStylesheets().add(css);
+        app_stage.setScene(home_page_scene);
+        app_stage.show();
+     }
     
+    @FXML
+    private void searchButtonAction(ActionEvent event) throws IOException {
+        String css = JavaFXApplication9CheckBox.class.getResource("listStyle.css").toExternalForm();
+        
+        FXMLLoader loader = new FXMLLoader();
+        loader.setLocation(getClass().getResource("FXMLSecondDocument.fxml"));
+        Parent home_page_parent = loader.load();
+        
+        
+        Scene home_page_scene = new Scene(home_page_parent);
+        
+        FXMLSecondDocumentController controller = loader.getController();
+        
+        Review tempReview1 = new Review("date","3","search button temporary review","Vijayvargiya", "11");
+        Review[] tempReviewArray1 = new Review[]{tempReview1};
+        controller.initObservableReviewList(tempReviewArray1);
+//      controller.initObservableReviewList(tableView1.getSelectionModel().getSelectedItem().getReviewList());
+        
+        Stage app_stage = (Stage)((Node) event.getSource()).getScene().getWindow();
+        home_page_scene.getStylesheets().add(css);
+        app_stage.setScene(home_page_scene);
+        app_stage.show();
+     }
+    
+     
+   
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
-        list1 =     FXCollections.observableArrayList("ONE", "TWO", "THREE", "FOUR", "FIVE", "SIX");
+        mainBusinessCategoryArrayList = new ArrayList<String>();
+        mainBusinessCategorySimpleArray = new String[]{
+            "Active Life"
+            ,"Arts & Entertainment"
+            ,"Automotive"
+            ,"Car Rental"
+            ,"Cafes"
+            ,"Beauty & Spas"
+            ,"Convenience Stores"
+            ,"Dentists"
+            ,"Doctors"
+            ,"Drugstores"
+            ,"Department Stores"
+            ,"Education"
+            ,"Event Planning & Services"
+            ,"Flowers & Gifts"
+            ,"Food"
+            ,"Health & Medical"
+            ,"Home Services"
+            ,"Home & Garden"
+            ,"Hospitals"
+            ,"Hotels & Travel"
+            ,"Hardware Stores"
+            ,"Grocery"
+            ,"Medical Centers"
+            ,"Nurseries & Gardening"
+            ,"Nightlife"
+            ,"Restaurants"
+            ,"Shopping"
+            ,"Transportation"};
+        for(String str: mainBusinessCategorySimpleArray){
+                mainBusinessCategoryArrayList.add(str);  //something like this?
+           }
+        list1 = FXCollections.observableArrayList(mainBusinessCategoryArrayList);
         listView1.setItems(list1);
 //        listView1.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
 //        @Override
@@ -91,12 +183,19 @@ public class FXMLDocumentController implements Initializable {
                     BooleanProperty observable = new SimpleBooleanProperty();
                     observable.addListener((obs, wasSelected, isNowSelected) -> {
                         if (isNowSelected) {
-                            list2.add(item);
+                            
+                                list2.add(item);
+                                listView1CheckedItems.add(item);
+                                System.out.println(listView1CheckedItems.toString());
+                               
                         } else {
-                            list2.remove(item);
-                            list3.remove(item);
+                                listView1CheckedItems.remove(item);
+                               list2.remove(item);
+                              list3.remove(item);
+                           System.out.println(listView1CheckedItems.toString());
                         }
                     });
+                    
                     return observable;
                 }
             }));
@@ -119,8 +218,10 @@ public class FXMLDocumentController implements Initializable {
                     observable.addListener((obs, wasSelected, isNowSelected) -> {
                         if (isNowSelected) {
                             list3.add(item);
+                            listView2CheckedItems.add(item);
                         } else {
                             list3.remove(item);
+                            listView2CheckedItems.remove(item);
                         }
                     });
                     return observable;
@@ -134,13 +235,13 @@ public class FXMLDocumentController implements Initializable {
                 @Override
                 public ObservableValue<Boolean> call(String item) {
                     BooleanProperty observable = new SimpleBooleanProperty();
-//                    observable.addListener((obs, wasSelected, isNowSelected) -> {
-//                        if (isNowSelected) {
-//                            list3.add(item);
-//                        } else {
-//                            list3.remove(item);
-//                        }
-//                    });
+                    observable.addListener((obs, wasSelected, isNowSelected) -> {
+                        if (isNowSelected) {
+                            listView3CheckedItems.add(item);
+                        } else {
+                            listView3CheckedItems.remove(item);
+                        }
+                    });
                     return observable;
                 }
             }));
@@ -153,7 +254,23 @@ public class FXMLDocumentController implements Initializable {
         table1ColumnStars.setCellValueFactory(new PropertyValueFactory<>("stars"));
         
         tableView1.setItems(tableList1);
-        tableList1.add(new Business(1 ,"Business1", "Santa Clara", "CA", "4.5"));
+        tableView1.setRowFactory( tv -> {
+            TableRow<Business> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 1 && (! row.isEmpty()) ) {
+                    try {   
+                        tableView1SelectAction(event);
+                    } catch (IOException ex) {
+                        Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            });
+            return row ;
+        });
+
+        Review tempReview = new Review("date","4","some text","Anmol", "6");
+        Review[] tempReviewArray = new Review[]{tempReview};
+        tableList1.add(new Business(1 ,"Business1", "Santa Clara", "CA", "4.5", tempReviewArray));
         
         
         comboBoxWeek =  FXCollections.observableArrayList("Monday", "Teusday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");

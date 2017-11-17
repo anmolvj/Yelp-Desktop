@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane id="AnchorPane" prefHeight="590.0" prefWidth="828.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafxapplication9checkbox.FXMLDocumentController">
+<AnchorPane fx:id="mainPane" id="AnchorPane" prefHeight="590.0" prefWidth="828.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafxapplication9checkbox.FXMLDocumentController">
    <children>
       <HBox layoutX="203.0" layoutY="58.0" prefHeight="445.0" prefWidth="828.0" AnchorPane.bottomAnchor="88.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="58.0">
          <effect>

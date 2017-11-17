@@ -18,15 +18,22 @@ public class Business {
     private final SimpleStringProperty city;
     private final SimpleStringProperty state;
     private final SimpleStringProperty stars;
+    private final Review[] reviews;
 
-    public Business(Integer bid, String name, String city, String state, String stars) {
+    public Business(Integer bid, String name, String city, String state, String stars, Review[] reviews) {
         this.bid = new SimpleIntegerProperty(bid);
         this.name = new SimpleStringProperty(name);
         this.city = new SimpleStringProperty(city);
         this.state = new SimpleStringProperty(state);
         this.stars = new SimpleStringProperty(stars);
+        this.reviews = reviews;
+        
     }
 
+    public Review[] getReviews() {
+        return reviews;
+    }
+    
     public Integer getBid() {
         return bid.get();
     }
