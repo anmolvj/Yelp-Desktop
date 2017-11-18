@@ -13,19 +13,26 @@ import javafx.beans.property.SimpleStringProperty;
  * @author Anmol
  */
 public class Business {
+     private final SimpleIntegerProperty sno;
     private final SimpleStringProperty bid;
     private final SimpleStringProperty name;
     private final SimpleStringProperty city;
     private final SimpleStringProperty state;
     private final SimpleStringProperty stars;
 
-    public Business(String bid, String name, String city, String state, String stars) {
+    public Business(Integer sno, String bid, String name, String city, String state, String stars) {
+        
+        this.sno = new SimpleIntegerProperty(sno);
         this.bid = new SimpleStringProperty(bid);
         this.name = new SimpleStringProperty(name);
         this.city = new SimpleStringProperty(city);
         this.state = new SimpleStringProperty(state);
         this.stars = new SimpleStringProperty(stars);
         
+    }
+    
+    public Integer getSno() {
+        return sno.get();
     }
     
     public String getBid() {

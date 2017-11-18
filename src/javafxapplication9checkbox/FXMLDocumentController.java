@@ -16,6 +16,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -63,6 +64,7 @@ public class FXMLDocumentController implements Initializable {
     @FXML String mainBusinessCategorySimpleArray[];
     
     @FXML private TableView<Business> tableView1;
+    @FXML private TableColumn<Business, String> table1ColumnSNO;
     @FXML private TableColumn<Business, String> table1ColumnName;
     @FXML private TableColumn<Business, String> table1ColumnCity;
     @FXML private TableColumn<Business, String> table1ColumnState;
@@ -87,7 +89,7 @@ public class FXMLDocumentController implements Initializable {
     }
     
     //BUSINESS TABLEVIEW ROW SELECTION HANDLER
-    @FXML private void tableView1SelectAction(Event event) throws IOException, SQLException {
+    @FXML private void tableView1SelectAction(Event event, String bid) throws IOException, SQLException {
         
         
         //SETUP FOR PREPARING SWITCH OF SCENE
@@ -102,60 +104,42 @@ public class FXMLDocumentController implements Initializable {
         
         //PASS REVIEW ARRAYLIST TO NEXT SCENE
 //        controller.initObservableReviewList(tableView1.getSelectionModel().getSelectedItem().getReviews());
-        controller.initObservableReviewList(review_final());
+        controller.initObservableReviewList(review_final(bid));
         Stage app_stage = (Stage)((Node) event.getSource()).getScene().getWindow();
         home_page_scene.getStylesheets().add(css);
         app_stage.setScene(home_page_scene);
         app_stage.show();
      }
     
+    
+    @FXML private String checkNull(Object obj){
+        return obj == null ? "null" : obj.toString();
+    }
     //SEARCH BUTTON ACTION HANDLER
     @FXML private void searchButtonAction(ActionEvent event) throws IOException, Exception {
-//        String css = JavaFXApplication9CheckBox.class.getResource("listStyle.css").toExternalForm();
-//        
-//        FXMLLoader loader = new FXMLLoader();
-//        loader.setLocation(getClass().getResource("FXMLSecondDocument.fxml"));
-//        Parent home_page_parent = loader.load();
-//        
-//        
-//        Scene home_page_scene = new Scene(home_page_parent);
-//        
-//        FXMLSecondDocumentController controller = loader.getController();
-//        
-//        Review tempReview1 = new Review("date","3","search button temporary review","Vijayvargiya", "11");
-//        Review[] tempReviewArray1 = new Review[]{tempReview1};
-////        controller.initObservableReviewList(tempReviewArray1);
-////      controller.initObservableReviewList(tableView1.getSelectionModel().getSelectedItem().getReviewList());
-//        
-//        Stage app_stage = (Stage)((Node) event.getSource()).getScene().getWindow();
-//        home_page_scene.getStylesheets().add(css);
-//        app_stage.setScene(home_page_scene);
-//        app_stage.show();
-//        app_stage.show();
-          ArrayList<String[]> tempBusinessTableData = new ArrayList<>();
-//          tempBusinessTableData = final_result(
-//                  listView1CheckedItems,
-//                  listView2CheckedItems,
-//                  listView3CheckedItems,
-//                  comboBox1.getSelectionModel().getSelectedItem().toString(),
-//                  comboBox3.getSelectionModel().getSelectedItem().toString(),
-//                  comboBox2.getSelectionModel().getSelectedItem().toString(),
-//                  comboBox4.getSelectionModel().getSelectedItem().toString()
-//          );
+            tableList1.clear();
+            ArrayList<String[]> tempBusinessTableData = new ArrayList<>();
+            
             tempBusinessTableData = final_result(
                   listView1CheckedItems,
                   listView2CheckedItems,
                   listView3CheckedItems,
-                  comboBox1.getSelectionModel().getSelectedItem().toString(),
-                  comboBox3.getSelectionModel().getSelectedItem().toString(),
-                  comboBox2.getSelectionModel().getSelectedItem().toString(),
+                  checkNull(comboBox1.getSelectionModel().getSelectedItem()),
+                  checkNull(comboBox3.getSelectionModel().getSelectedItem()),
+                  checkNull(comboBox2.getSelectionModel().getSelectedItem()),
                   comboBox4.getSelectionModel().getSelectedItem().toString()
              );
+            Collections.sort(tempBusinessTableData,new Comparator<String[]>() {
+            public int compare(String[] strings, String[] otherStrings) {
+                return strings[1].compareTo(otherStrings[1]);
+            }
+                });
           System.out.println(tempBusinessTableData.toString());
-          for(String[] str : tempBusinessTableData){
-             tableList1.add(new Business(str[0] ,str[1], str[2], str[3], str[4])); 
+          for(int i = 0; i < tempBusinessTableData.size(); i++){
+             String[] str = tempBusinessTableData.get(i);
+             tableList1.add(new Business(new Integer(i+1),str[0] ,str[1], str[2], str[3], str[4]));
+             System.out.println("Business No. "+ i + " " +str[1] + " " + str[2] + " " + str[3] + " " + str[4]);
           }
-          
      }
     
 //    MOAKE CONNECTION TO database
@@ -176,9 +160,8 @@ public class FXMLDocumentController implements Initializable {
 		return dbConnection;
 	}
    
-    @FXML private ArrayList<Review> review_final() throws SQLException {
+    @FXML private ArrayList<Review> review_final(String a) throws SQLException {
         ArrayList<Review> listOfReviewAttributes = new ArrayList<Review>();
-        String a  = "fpL1qcZ6qbWzC79WU0E-Ug";
         Connection conn = null;
         ResultSet result = null;
         java.sql.Statement stmt = null;
@@ -227,7 +210,16 @@ public class FXMLDocumentController implements Initializable {
     @FXML public ArrayList<String> find_second_col (ArrayList<String> a, String b) throws Exception
 	{
 		ArrayList<String> sub_catarray = new ArrayList<String>();
-		String between_values = b;
+		String between_values;
+                String b_v = b;
+		if(b_v.equals("AND"))
+		{
+			between_values = " INTERSECT ";
+		}
+		else
+		{
+			between_values = " UNION ";
+		}
 		between_values = " " + between_values + " ";
 		Connection conn = null;
 		ResultSet fireResult = null;
@@ -268,7 +260,16 @@ public class FXMLDocumentController implements Initializable {
 		ArrayList<String> att_catarray = new ArrayList<String>();
 		ArrayList<String> main_catarray = new ArrayList<String>();
 		main_catarray = b;
-		String between_values = c;
+		String between_values;
+                String b_v = c;
+		if(b_v.equals("AND"))
+		{
+			between_values = " INTERSECT ";
+		}
+		else
+		{
+			between_values = " UNION ";
+		}
 		between_values = " " + between_values + " ";
 		
 		Connection conn = null;
@@ -342,7 +343,7 @@ public class FXMLDocumentController implements Initializable {
                 float from_sel, to_sel;
 		//String loc_state = null;
 		//String loc_city = null;
-		if(from != null)
+		if(!from.equals("null"))
                 {
                    from_sel = Float.parseFloat(from); 
                 }
@@ -350,7 +351,7 @@ public class FXMLDocumentController implements Initializable {
                 {
                     from_sel = -1;
                 }
-                if(to != null)
+                if(!to.equals("null"))
                 {
                    to_sel = Float.parseFloat(to); 
                 }
@@ -360,14 +361,21 @@ public class FXMLDocumentController implements Initializable {
                 }
 		
                 
-		String[] row;
-                row = null;
+		
                 
 		Connection conn = null;
-		ResultSet fireResult = null;
+		ResultSet fireResult;
 		java.sql.Statement stmt = null;
 		String query = null;
-		if(att_catarray!=null)
+                
+                if(att_catarray.isEmpty() && sub_catarray.isEmpty() && main_catarray.isEmpty())
+                {
+                    System.out.println("NOTHING IS HERE!!!");
+                    String[] temp = {"1","nothing","nothing","nothing","nothin"};
+                    bus_list.add(temp);
+                    return bus_list;
+                }
+		if(!att_catarray.isEmpty())
 		{
 			String mainQuery = null;
 			String select_query = " SELECT DISTINCT B.BID, B.B_NAME, B.CITY, B.STATE, B.STARS ";
@@ -385,7 +393,7 @@ public class FXMLDocumentController implements Initializable {
 //				where_query = where_query + " AND B.STATE LIKE '" + loc_state + "'";
 //			}
 			
-			if (day != null)
+			if (!day.equals("null"))
 			{
 				from_query = from_query + ", B_HOURS H ";
 				where_query = where_query + " AND B.BID = H.BID AND H.D_O_W LIKE '"+ day + "' AND H.FROM_H >= " + from_sel + " AND H.TO_H <=" + to_sel;
@@ -395,16 +403,16 @@ public class FXMLDocumentController implements Initializable {
 				if(from_sel >= 0)
 				{
 					from_query = from_query + ", B_HOURS H ";
-					where_query = where_query + " AND B.BID = H.BID AND H.FROM_H >= " + from_sel;
+					where_query = where_query + " AND B.BID = H.BID AND H.FROM_H <= " + from_sel;
 					if(to_sel <= 24)
 					{
-						where_query = where_query + " AND H.TO_H <= " + to_sel;
+						where_query = where_query + " AND H.TO_H >= " + to_sel;
 					}
 				}
 				else if(to_sel <= 24)
 				{
 					from_query = from_query + ", B_HOURS H ";
-					where_query = where_query + " AND B.BID = H.BID AND H.TO_H <=" + to_sel;
+					where_query = where_query + " AND B.BID = H.BID AND H.TO_H >=" + to_sel;
 				}
 			}			
 			
@@ -419,7 +427,7 @@ public class FXMLDocumentController implements Initializable {
 					{	
 						for(int k = 0; k < att_catarray.size(); k++)
 						{
-							if (i == main_catarray.size() - 1 && j == sub_catarray.size() -1) 
+							if (i == main_catarray.size() - 1 && j == sub_catarray.size() -1 && k == att_catarray.size() -1) 
 							{
 								query = query + "'" + main_catarray.get(i) + "'" + subquery + "'" + sub_catarray.get(j)+ "'" + subquery2 + "'" + att_catarray.get(k) + "'";
 							} else 
@@ -431,7 +439,7 @@ public class FXMLDocumentController implements Initializable {
 				}
 				//last line of attr_catarray
 		}
-		else if( sub_catarray != null)
+		else if( !sub_catarray.isEmpty())
 		{
 			String mainQuery = null;
 			String select_query = " SELECT DISTINCT B.BID, B.B_NAME, B.CITY, B.STATE, B.STARS ";
@@ -449,26 +457,26 @@ public class FXMLDocumentController implements Initializable {
 //				where_query = where_query + " AND B.STATE LIKE '" + loc_state + "'";
 //			}
 			
-			if (day != null)
+			if (!day.equals("null"))
 			{
 				from_query = from_query + ", B_HOURS H ";
-				where_query = where_query + " AND B.BID = H.BID AND H.D_O_W = '"+ day + "' AND H.FROM_H >= " + from_sel + " AND H.TO_H <=" + to_sel;
+				where_query = where_query + " AND B.BID = H.BID AND H.D_O_W = '"+ day + "' AND H.FROM_H <= " + from_sel + " AND H.TO_H <=" + to_sel;
 			}
 			else
 			{
 				if(from_sel >= 0)
 				{
 					from_query = from_query + ", B_HOURS H ";
-					where_query = where_query + " AND B.BID = H.BID AND H.FROM_H >= " + from_sel;
+					where_query = where_query + " AND B.BID = H.BID AND H.FROM_H <= " + from_sel;
 					if(to_sel <= 24)
 					{
-						where_query = where_query + " AND H.TO_H <= " + to_sel;
+						where_query = where_query + " AND H.TO_H >= " + to_sel;
 					}
 				}
 				else if(to_sel <= 24)
 				{
 					from_query = from_query + ", B_HOURS H ";
-					where_query = where_query + " AND B.BID = H.BID AND H.TO_H <=" + to_sel;
+					where_query = where_query + " AND B.BID = H.BID AND H.TO_H >=" + to_sel;
 				}
 			}			
 			
@@ -491,7 +499,7 @@ public class FXMLDocumentController implements Initializable {
 				
 			//last line of sub_catarray
 		}
-		else if(main_catarray!=null)
+		else if(!main_catarray.isEmpty())
 		{
 			//String mainQuery = null;
 			String select_query = " SELECT DISTINCT B.BID, B.B_NAME, B.CITY, B.STATE, B.STARS ";
@@ -509,26 +517,26 @@ public class FXMLDocumentController implements Initializable {
 //				where_query = where_query + " AND B.STATE = '" + loc_state + "'";
 //			}
 			
-			if (day != null)
+			if (!day.equals("null"))
 			{
 				from_query = from_query + ", B_HOURS H ";
-				where_query = where_query + " AND B.BID = H.BID AND H.D_O_W = '"+ day + "' AND H.FROM_H >= " + from_sel + " AND H.TO_H <=" + to_sel;
+				where_query = where_query + " AND B.BID = H.BID AND H.D_O_W = '"+ day + "' AND H.FROM_H <= " + from_sel + " AND H.TO_H <=" + to_sel;
 			}
 			else
 			{
 				if(from_sel >= 0)
 				{
 					from_query = from_query + ", B_HOURS H ";
-					where_query = where_query + " AND B.BID = H.BID AND H.FROM_H >= " + from_sel;
+					where_query = where_query + " AND B.BID = H.BID AND H.FROM_H <= " + from_sel;
 					if(to_sel <= 24)
 					{
-						where_query = where_query + " AND H.TO_H <= " + to_sel;
+						where_query = where_query + " AND H.TO_H >= " + to_sel;
 					}
 				}
 				else if(to_sel <= 24)
 				{
 					from_query = from_query + ", B_HOURS H ";
-					where_query = where_query + " AND B.BID = H.BID AND H.TO_H <=" + to_sel;
+					where_query = where_query + " AND B.BID = H.BID AND H.TO_H >=" + to_sel;
 				}
 			}
 			
@@ -550,23 +558,38 @@ public class FXMLDocumentController implements Initializable {
 		conn = getDBConnection();
 		stmt = conn.prepareStatement(query);
 		fireResult = stmt.executeQuery(query);
-			
+                
 		ResultSetMetaData meta = fireResult.getMetaData();
+                int nCol = meta.getColumnCount();
+                
 		while (fireResult.next()) 
 		{
-			for (int iCol = 1; iCol <= 5; iCol++) {
-				
-				
-					row[iCol - 1] = (fireResult.getObject(iCol)).toString();
-				
+                    String[] row;
+                row = new String[5];
+			for (int iCol = 1; iCol <= nCol; iCol++) {
+				 
+				if (iCol != nCol)
+                                {
+                                  
+					row[iCol - 1] = fireResult.getString(iCol).toString();
+                                       
+                                }else{
+                                    
+                                    Double tempDouble = fireResult.getDouble(iCol);                                 
+                                    row[iCol - 1] = String.valueOf(tempDouble);
+                                    
+                                }
 
-				System.out.println("Display->" + fireResult.getString(iCol));
+				
 				//row[iCol - 1] = result.getObject(iCol).toString();
-
+                                 
 			}
-                        bus_list.add(row);
-
+                       
+                       bus_list.add(row);
+                       System.out.println(row[0]+row[1]+row[2]+row[3]+row[4]);
+                       
 		}
+               
 		return bus_list;
 	}
     
@@ -628,11 +651,11 @@ public class FXMLDocumentController implements Initializable {
                                 ArrayList<String> tempRes = find_second_col(listView1CheckedItems, comboBox4.getSelectionModel().getSelectedItem().toString());
                                 if(tempRes==null){
                                     list2.clear();
-                                    System.out.println("1");
+                                    System.out.println("List 2 cleared since no result from find_second_col");
                                 } else{
                                  list2.clear();
                                  list2.addAll(tempRes);
-                                 System.out.println("2" + comboBox4.getSelectionModel().getSelectedItem().toString());
+                                 System.out.println("List2 updated, result -> " + tempRes.toString() );
                                 }
                                 
                             } catch (Exception ex) {
@@ -646,9 +669,11 @@ public class FXMLDocumentController implements Initializable {
                                 
                                 if(listView1CheckedItems.isEmpty()){
                                     list2.clear();
+                                    list3.clear();
                                     System.out.println("3");
                                 } else{
                                  list2.clear();
+                                 list3.clear();
                                  list2.addAll(find_second_col(listView1CheckedItems, comboBox4.getSelectionModel().getSelectedItem().toString()));
                                  System.out.println("4" + comboBox4.getSelectionModel().getSelectedItem().toString());
                                 }
@@ -688,11 +713,11 @@ public class FXMLDocumentController implements Initializable {
                                 ArrayList<String> tempRes = find_third_col(listView2CheckedItems,listView1CheckedItems, comboBox4.getSelectionModel().getSelectedItem().toString());
                                 if(tempRes==null){
                                     list3.clear();
-                                    System.out.println("1");
+                                    System.out.println("List 3 cleared since no result from find_second_col");
                                 } else{
                                  list3.clear();
                                  list3.addAll(tempRes);
-                                 System.out.println("2" + comboBox4.getSelectionModel().getSelectedItem().toString());
+                                 System.out.println("List3 updated, result -> " + tempRes.toString());
                                 }
                                 
                             } catch (Exception ex) {
@@ -745,6 +770,7 @@ public class FXMLDocumentController implements Initializable {
         
         //SETUP FOR BUSINESS TABLEVIEW
         tableList1 =  FXCollections.observableArrayList();
+        table1ColumnSNO.setCellValueFactory(new PropertyValueFactory<>("sno"));
         table1ColumnName.setCellValueFactory(new PropertyValueFactory<>("name"));
         table1ColumnCity.setCellValueFactory(new PropertyValueFactory<>("city"));
         table1ColumnState.setCellValueFactory(new PropertyValueFactory<>("state"));
@@ -756,7 +782,7 @@ public class FXMLDocumentController implements Initializable {
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 1 && (! row.isEmpty()) ) {
                     try {   
-                        tableView1SelectAction(event);
+                        tableView1SelectAction(event,tableView1.getSelectionModel().getSelectedItem().getBid());
                     } catch (IOException ex) {
                         Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
                     } catch (SQLException ex) {
