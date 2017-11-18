@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package javafxapplication9checkbox;
+package assignment3;
 
 import java.io.IOException;
 import java.net.URL;
@@ -30,7 +30,7 @@ import javafx.stage.Stage;
  *
  * @author Anmol
  */
-public class FXMLSecondDocumentController implements Initializable {
+public class ReviewController implements Initializable {
 
     /**
      * Initializes the controller class.
@@ -49,8 +49,8 @@ public class FXMLSecondDocumentController implements Initializable {
     private void goBackButtonAction(ActionEvent event) throws IOException {
         System.out.println("You Want to go Back!");
         System.out.println("You clicked Search!");
-        String css = GUI.class.getResource("listStyle.css").toExternalForm();
-        Parent home_page_parent = FXMLLoader.load(getClass().getResource("FXMLDocument.fxml"));
+        String css = GUI.class.getResource("stylesheet.css").toExternalForm();
+        Parent home_page_parent = FXMLLoader.load(getClass().getResource("Main.fxml"));
         Scene home_page_scene = new Scene(home_page_parent);
         Stage app_stage = (Stage)((Node) event.getSource()).getScene().getWindow();
         home_page_scene.getStylesheets().add(css);

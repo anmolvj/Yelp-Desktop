@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package javafxapplication9checkbox;
+package assignment3;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -53,7 +53,7 @@ import javafx.util.Callback;
  *
  * @author Anmol
  */
-public class FXMLDocumentController implements Initializable {
+public class MainController implements Initializable {
     
     @FXML private Label label;
     @FXML private ListView listView1, listView2, listView3;
@@ -146,12 +146,12 @@ public class FXMLDocumentController implements Initializable {
         
         
         //SETUP FOR PREPARING SWITCH OF SCENE
-        String css = GUI.class.getResource("listStyle.css").toExternalForm();
+        String css = GUI.class.getResource("stylesheet.css").toExternalForm();
         FXMLLoader loader = new FXMLLoader();
-        loader.setLocation(getClass().getResource("FXMLSecondDocument.fxml"));
+        loader.setLocation(getClass().getResource("Review.fxml"));
         Parent home_page_parent = loader.load();
         Scene home_page_scene = new Scene(home_page_parent);
-        FXMLSecondDocumentController controller = loader.getController();
+        ReviewController controller = loader.getController();
         
         
         
@@ -171,6 +171,7 @@ public class FXMLDocumentController implements Initializable {
     //SEARCH BUTTON ACTION HANDLER
     @FXML private void searchButtonAction(ActionEvent event) throws IOException, Exception {
             tableList1.clear();
+            
             ArrayList<String[]> tempBusinessTableData = new ArrayList<>();
             
             tempBusinessTableData = final_result(
@@ -193,6 +194,10 @@ public class FXMLDocumentController implements Initializable {
              tableList1.add(new Business(new Integer(i+1),str[0] ,str[1], str[2], str[3], str[4]));
              System.out.println("Business No. "+ i + " " +str[1] + " " + str[2] + " " + str[3] + " " + str[4]);
           }
+          
+          System.out.println(list1.toString());
+          System.out.println(list2.toString());
+          System.out.println(list3.toString());
      }
     
 //    MOAKE CONNECTION TO database
@@ -699,30 +704,39 @@ public class FXMLDocumentController implements Initializable {
                     BooleanProperty observable = new SimpleBooleanProperty();
                     observable.addListener((obs, wasSelected, isNowSelected) -> {
                         if (isNowSelected) {
-                            listView1CheckedItems.add(item);    
+                            listView1CheckedItems.add(item);
+                            listView2CheckedItems.clear();
+                            listView3CheckedItems.clear();
+                            list2.clear();
+                            list3.clear();
                             try { 
                                 ArrayList<String> tempRes = find_second_col(listView1CheckedItems, comboBox4.getSelectionModel().getSelectedItem().toString());
                                 if(tempRes==null){
-                                    list2.clear();
+                                   
                                     System.out.println("List 2 cleared since no result from find_second_col");
                                 } else{
-                                 list2.clear();
+                                 
                                  list2.addAll(tempRes);
                                  System.out.println("List2 updated, result -> " + tempRes.toString() );
                                 }
                                 
                             } catch (Exception ex) {
-                                Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+                                Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
                             }
                             System.out.println(listView1CheckedItems.toString());
                                
                         } else {
                                 listView1CheckedItems.remove(item);
+                                listView2CheckedItems.clear();
+                                listView3CheckedItems.clear();
+                                list2.clear();
+                                list3.clear();
+                                
                                 try {        
                                 
                                 if(listView1CheckedItems.isEmpty()){
-                                    list2.clear();
-                                    list3.clear();
+                                   
+                                    
                                     System.out.println("3");
                                 } else{
                                  list2.clear();
@@ -731,7 +745,7 @@ public class FXMLDocumentController implements Initializable {
                                  System.out.println("4" + comboBox4.getSelectionModel().getSelectedItem().toString());
                                 }
                             } catch (Exception ex) {
-                                Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+                                Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
                             } 
                             list3.remove(item);
 //                           System.out.println(listView1CheckedItems.toString());
@@ -759,9 +773,9 @@ public class FXMLDocumentController implements Initializable {
                     BooleanProperty observable = new SimpleBooleanProperty();
                     observable.addListener((obs, wasSelected, isNowSelected) -> {
                         if (isNowSelected) {
-//                            list3.add(item);
-//                            listView2CheckedItems.add(item);
-                            listView2CheckedItems.add(item);    
+                            listView2CheckedItems.add(item);
+                            listView3CheckedItems.clear();
+                            list3.clear();
                             try { 
                                 ArrayList<String> tempRes = find_third_col(listView2CheckedItems,listView1CheckedItems, comboBox4.getSelectionModel().getSelectedItem().toString());
                                 if(tempRes==null){
@@ -774,24 +788,27 @@ public class FXMLDocumentController implements Initializable {
                                 }
                                 
                             } catch (Exception ex) {
-                                Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+                                Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
                             }
                             System.out.println(listView1CheckedItems.toString());
                         } else {
                             listView2CheckedItems.remove(item);
+                            listView3CheckedItems.clear();
+                            list3.clear();
                                 try {        
-                                
                                 if(listView2CheckedItems.isEmpty()){
-                                    list3.clear();
+                                    
                                     System.out.println("3");
                                 } else{
-                                 list3.clear();
                                  list3.addAll(find_third_col(listView2CheckedItems,listView1CheckedItems, comboBox4.getSelectionModel().getSelectedItem().toString()));
                                  System.out.println("4" + comboBox4.getSelectionModel().getSelectedItem().toString());
                                 }
                             } catch (Exception ex) {
-                                Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+                                Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
                             } 
+//                            list3.remove(item);
+//                            list3.remove(item);
+//                            listView2CheckedItems.remove(item); 
 //                            list3.remove(item);
 //                            list3.remove(item);
 //                            listView2CheckedItems.remove(item);
@@ -830,16 +847,16 @@ public class FXMLDocumentController implements Initializable {
         table1ColumnStars.setCellValueFactory(new PropertyValueFactory<>("stars"));
         
         tableView1.setItems(tableList1);
-        tableView1.setRowFactory( tv -> {
+        tableView1.setRowFactory(tv -> {
             TableRow<Business> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 1 && (! row.isEmpty()) ) {
                     try {   
                         tableView1SelectAction(event,tableView1.getSelectionModel().getSelectedItem().getBid());
                     } catch (IOException ex) {
-                        Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
                     } catch (SQLException ex) {
-                        Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
             });
@@ -862,7 +879,7 @@ public class FXMLDocumentController implements Initializable {
             locationHashMap = find_location();
             System.out.println(locationHashMap.toString());
         } catch (Exception ex) {
-            Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
         }
         //COMBOBOX - STATE
         comboBoxState =  FXCollections.observableArrayList();

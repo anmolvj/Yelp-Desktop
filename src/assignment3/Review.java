@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package javafxapplication9checkbox;
+package assignment3;
 
 import javafx.beans.property.SimpleStringProperty;
 
