@@ -49,7 +49,7 @@ public class FXMLSecondDocumentController implements Initializable {
     private void goBackButtonAction(ActionEvent event) throws IOException {
         System.out.println("You Want to go Back!");
         System.out.println("You clicked Search!");
-        String css = JavaFXApplication9CheckBox.class.getResource("listStyle.css").toExternalForm();
+        String css = GUI.class.getResource("listStyle.css").toExternalForm();
         Parent home_page_parent = FXMLLoader.load(getClass().getResource("FXMLDocument.fxml"));
         Scene home_page_scene = new Scene(home_page_parent);
         Stage app_stage = (Stage)((Node) event.getSource()).getScene().getWindow();

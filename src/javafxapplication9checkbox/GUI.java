@@ -15,14 +15,14 @@ import javafx.stage.Stage;
  *
  * @author Anmol
  */
-public class JavaFXApplication9CheckBox extends Application {
+public class GUI extends Application {
     
     @Override
     public void start(Stage stage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("FXMLDocument.fxml"));
         
         Scene scene = new Scene(root);
-        String css = JavaFXApplication9CheckBox.class.getResource("listStyle.css").toExternalForm();
+        String css = GUI.class.getResource("listStyle.css").toExternalForm();
         scene.getStylesheets().add(css);
         
         stage.setScene(scene);

@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -71,15 +72,67 @@ public class FXMLDocumentController implements Initializable {
     @FXML private TableColumn<Business, String> table1ColumnStars;
     @FXML ObservableList<Business> tableList1;
    
-    @FXML ComboBox comboBox1, comboBox2, comboBox3, comboBox4;
-    @FXML ObservableList<String> comboBoxWeek, comboBoxSelectAttribute ;
+    @FXML ComboBox comboBox1, comboBox2, comboBox3, comboBox4,comboBox5,comboBox6 ;
+    @FXML ObservableList<String> comboBoxWeek, comboBoxSelectAttribute, comboBoxState, comboBoxCity;
     @FXML ObservableList<Integer> comboBoxTimeFrom, comboBoxTimeTo;    
     @FXML ArrayList<Integer> timeArrayList;
     @FXML int timeListSimpleArray[];
     
+    @FXML HashMap<String,String> locationHashMap;
     
     @FXML private Button closeButton, searchButton;
 
+    @FXML private void update_state(){
+        ArrayList<String> ls = new ArrayList<>(); 
+        for (String key : locationHashMap.keySet()) {
+            if(!ls.contains(locationHashMap.get(key))){
+                ls.add(locationHashMap.get(key));
+            }
+         }
+        comboBoxState.setAll(ls);
+    }
+    @FXML private void update_city(String state){
+        ArrayList<String> ls = new ArrayList<>(); 
+        for (String key : locationHashMap.keySet()) {
+            if (state.equals(locationHashMap.get(key))) {
+                if(!ls.contains(key)){
+                    ls.add(key);
+                }
+            }
+         }
+        comboBoxCity.setAll(ls);
+    }
+    
+    
+    @FXML private HashMap<String,String> find_location() throws Exception
+	{
+		HashMap<String,String> newmap = new HashMap<>();
+		String mainQuery = "SELECT DISTINCT B.CITY, B.STATE FROM BUSINESS B";
+		Connection conn = null;
+		ResultSet fireResult = null;
+		java.sql.Statement stmt = null;
+		conn = getDBConnection();
+		stmt = conn.prepareStatement(mainQuery);
+		fireResult = stmt.executeQuery(mainQuery);
+		ResultSetMetaData meta = fireResult.getMetaData();
+		int nCol = meta.getColumnCount();
+		System.out.println("Column Size->" + nCol);
+
+		while (fireResult.next()) 
+		{
+			
+			String[] row = new String[nCol];
+			for (int iCol = 1; iCol <= nCol; iCol++) 
+			{	 
+					row[iCol - 1] = fireResult.getObject(iCol).toString();
+				System.out.println("Display->" + fireResult.getString(iCol));
+			}
+			newmap.put(row[0], row[1]);
+		}
+		return newmap;
+	}
+    
+    
     //CLOSE BUTTON ACTION HANDLER
     @FXML private void closeButtonAction(){
         // get a handle to the stage
@@ -93,7 +146,7 @@ public class FXMLDocumentController implements Initializable {
         
         
         //SETUP FOR PREPARING SWITCH OF SCENE
-        String css = JavaFXApplication9CheckBox.class.getResource("listStyle.css").toExternalForm();
+        String css = GUI.class.getResource("listStyle.css").toExternalForm();
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(getClass().getResource("FXMLSecondDocument.fxml"));
         Parent home_page_parent = loader.load();
@@ -212,7 +265,7 @@ public class FXMLDocumentController implements Initializable {
 		ArrayList<String> sub_catarray = new ArrayList<String>();
 		String between_values;
                 String b_v = b;
-		if(b_v.equals("AND"))
+		if(b_v.equals("All Attributes"))
 		{
 			between_values = " INTERSECT ";
 		}
@@ -262,7 +315,7 @@ public class FXMLDocumentController implements Initializable {
 		main_catarray = b;
 		String between_values;
                 String b_v = c;
-		if(b_v.equals("AND"))
+		if(b_v.equals("All Attributes"))
 		{
 			between_values = " INTERSECT ";
 		}
@@ -327,7 +380,7 @@ public class FXMLDocumentController implements Initializable {
 		att_catarray = c;
 		String between_values;
 		String b_v = g;
-		if(b_v.equals("AND"))
+		if(b_v.equals("All Attributes"))
 		{
 			between_values = " INTERSECT ";
 		}
@@ -797,12 +850,40 @@ public class FXMLDocumentController implements Initializable {
 //        Review[] tempReviewArray = new Review[]{tempReview};
 //        tableList1.add(new Business("1" ,"Business1", "Santa Clara", "CA", "4.5"));
         
-        
+        //COMBOBOX - WEEK
         comboBoxWeek =  FXCollections.observableArrayList("Monday", "Teusday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
         comboBox1.setItems(comboBoxWeek);
         comboBox1.setPromptText("Day Of Week");
         
         
+        
+        try {
+            //GET LOCATION DATA
+            locationHashMap = find_location();
+            System.out.println(locationHashMap.toString());
+        } catch (Exception ex) {
+            Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        //COMBOBOX - STATE
+        comboBoxState =  FXCollections.observableArrayList();
+        comboBox5.setItems(comboBoxState);
+        comboBox5.setPromptText("State");
+        comboBox5.setOnAction( e -> {
+//            System.out.println(comboBox5.getValue().getClass().getName());
+         update_city(comboBox5.getValue().toString());   
+         
+         });
+        update_state();
+        
+        //COMBOBOX - CITY
+        comboBoxCity =  FXCollections.observableArrayList();
+        comboBox6.setItems(comboBoxCity);
+        comboBox6.setPromptText("City");
+        
+        
+        
+        
+        //COMBOBOX - TIME FROM
         timeListSimpleArray = new int[]{1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23};
         timeArrayList = new ArrayList<Integer>();
         for(int i =  0; i < timeListSimpleArray.length; i++){
@@ -814,6 +895,8 @@ public class FXMLDocumentController implements Initializable {
         comboBox2.setPromptText("From");
        
         
+        
+        //COMBOBOX - TIME TO
         comboBoxTimeTo =  FXCollections.observableArrayList();
         comboBox3.setItems(comboBoxTimeTo);
         comboBox3.setPromptText("To");
@@ -830,7 +913,7 @@ public class FXMLDocumentController implements Initializable {
          });
          
          
-        comboBoxSelectAttribute = FXCollections.observableArrayList("AND","OR"); 
+        comboBoxSelectAttribute = FXCollections.observableArrayList("All Attributes","Any Attributes"); 
         comboBox4.setItems(comboBoxSelectAttribute);
         comboBox4.setPromptText("Select Attributes");
         comboBox4.getSelectionModel().selectFirst();
